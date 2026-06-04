@@ -1,1 +1,34 @@
+name: Build Geode Mod
 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y cmake ninja-build clang
+
+    - name: Install Geode SDK
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/geode-sdk/geode/main/install.sh | bash
+        echo "$HOME/.local/share/geode/bin" >> $GITHUB_PATH
+
+    - name: Build mod
+      run: |
+        geode build
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: mod
+        path: build/*.geode

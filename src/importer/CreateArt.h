@@ -20,35 +20,54 @@ static auto ALLOWED_TYPES2 = file::FilePickOptions{
 
 class CreateArt final{
 private:
+    // object IDs for various object sizes
     static constexpr int pixelObjID = 3097;
     static constexpr int medPixelObjID = 3094;
     static constexpr int bigPixelObjID = 3093;
     static constexpr int largePixelObjID = 3092;
+
+    // old pixel objects
     static constexpr int oldPixelObjID = 917;
     static constexpr int oldLargePixelObjID = 211;
+
+    // z order layering
     static constexpr int zOrder = 1;
+
+    // size of the objects
     static constexpr float objSize = 5.0f;
-    static constexpr float scale = 5;
 
+    // base scale between pixels
+    static constexpr float scale = 5.0f;
+
+    // number of channels
     int channels = 4;
-    int height = 0;
+
+    // image size
     int width = 0;
+    int height = 0;
 
-    float scaleMulX = 1.0f;   // ← ДОБАВЛЕНО
-    float scaleMulY = 1.0f;   // ← ДОБАВЛЕНО
+    // NEW — scale multipliers from text input
+    float scaleMulX = 1.0f;
+    float scaleMulY = 1.0f;
 
+    // background optimisation color
     uint8_t Mr = 0;
     uint8_t Mg = 0;
     uint8_t Mb = 0;
 
+    // image data
     unsigned char* data = nullptr;
 
+    // object string
     std::ostringstream objInLevel;
 
+    // selected object
     GameObject* obj = nullptr;
 
+    // close menu callback
     std::function<void()> closeMenu = nullptr;
 
+    // settings
     bool limitSize = Mod::get()->getSettingValue<bool>("Disable-limit");
     int sizeLimit = Mod::get()->getSettingValue<int>("Size-limit");
     int colourChannel = Mod::get()->getSettingValue<int>("Colour-channel");
@@ -57,13 +76,16 @@ private:
     std::string basic = Mod::get()->getSettingValue<std::string>("Optimise-Type");
     bool backgroundOp = Mod::get()->getSettingValue<bool>("Background-Optimisation");
 
+    // main import logic
     void placeArt(const std::string& p);
 
+    // import methods
     void simpleImport(const std::string& p);
     void basicOptimiseImport(const std::string& p);
     void scaleOptimiseImport(const std::string& p);
     void optimiseJPG();
 
+    // helpers
     void formatHSV(float red, float green, float blue, std::string& objColour) const;
     void RGBtoHSV(float& r, float& g, float& b) const;
     int bestFit(std::vector<std::vector<bool>>& p, unsigned char const* data, int x, int y, int ch, int wid, int hi);
@@ -76,11 +98,16 @@ public:
     CreateArt() {}
     ~CreateArt() {}
 
+    // importing the art
     void importArt();
+
+    // update settings
     void updateSettings();
 
+    // setters
     void setSelectedObject(GameObject* o) { obj = o; }
     void setCloseMenu(std::function<void()> c) { closeMenu = c; }
 
-    void setTargetSize(int w, int h);   // ← ДОБАВЛЕНО
+    // NEW — set target size from text input
+    void setTargetSize(int w, int h);
 };

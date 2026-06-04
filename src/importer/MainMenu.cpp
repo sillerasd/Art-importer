@@ -1,19 +1,20 @@
 #include "MainMenu.h"
+#include "CreateArt.h"
 
 bool MainMenu::init(CCArray* startObj, CreateArt* artImposter) {
-    if (!Popup::init(240.0f, 130.0f)) return false;
+    if (!Popup::init(240.0f, 160.0f)) return false;
 
     artPointer = artImposter;
 
     this->setTitle(" Choose a file to import ");
 
     // imports the art
-    CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
+    auto btn = CCMenuItemSpriteExtra::create(
         ButtonSprite::create("Choose a file"),
         this,
         menu_selector(MainMenu::importArt)
     );
-    btn->setPosition(MainMenu::m_size.width / 2, MainMenu::m_size.height / 2 + 7.5f);
+    btn->setPosition(MainMenu::m_size.width / 2, MainMenu::m_size.height / 2 + 20);
     this->m_buttonMenu->addChild(btn);
 
     // opens the settings menu
@@ -22,8 +23,14 @@ bool MainMenu::init(CCArray* startObj, CreateArt* artImposter) {
         this,
         menu_selector(MainMenu::openSettings)
     );
-    btn->setPosition(MainMenu::m_size.width / 2, MainMenu::m_size.height / 2 - 32.5f);
+    btn->setPosition(MainMenu::m_size.width / 2, MainMenu::m_size.height / 2 - 20);
     this->m_buttonMenu->addChild(btn);
+
+    // --- ТЕКСТОВОЕ ПОЛЕ ДЛЯ РАЗМЕРА ---
+    sizeInput = CCTextInputNode::create("64x64", this, "bigFont.fnt", 100, 30);
+    sizeInput->setPosition({ MainMenu::m_size.width / 2, MainMenu::m_size.height / 2 - 60 });
+    sizeInput->setAllowedChars("0123456789xX");
+    this->addChild(sizeInput);
 
     // info menu
     btn = CCMenuItemSpriteExtra::create(
@@ -34,46 +41,40 @@ bool MainMenu::init(CCArray* startObj, CreateArt* artImposter) {
     btn->setPosition(MainMenu::m_size.width, MainMenu::m_size.height);
     this->m_buttonMenu->addChild(btn);
 
-    //btn = CCMenuItemSpriteExtra::create(
-    //    ButtonSprite::create("Restart"),
-    //    this,
-    //    menu_selector(MainMenu::restartGame)
-    //);
-    //btn->setPosition(MainMenu::m_size.width / 2, MainMenu::m_size.height / 2 - 100.0f);
-    //this->m_buttonMenu->addChild(btn);
-
     return true;
 }
 
-// create the menu
 MainMenu* MainMenu::create(CCArray* startObj, CreateArt* artImposter) {
-    MainMenu* ret = new MainMenu();
-    // new sigma shit
-    if (ret->init(startObj, artImposter)) {
-		ret->autorelease();
-		return ret;
+    auto ret = new MainMenu();
+    if (ret && ret->init(startObj, artImposter)) {
+        ret->autorelease();
+        return ret;
     }
     delete ret;
-	return nullptr;
+    return nullptr;
 }
 
-// info menu that also contain another discord plug
-// discord grind never stops
 void MainMenu::openInfo(CCObject* sender) {
     geode::createQuickPopup(
         "Info",
-        "Imports images into the editor using pixels.\nI would recommend using a <cg>PNG</c> file.\nIf your art refuses to import then join my discord to get <cg>help</c>.",
-        "OK", "Get help",
-        [](auto, bool btn2) {
-            if (btn2) {
-                web::openLinkInBrowser("https://celestialgecko.github.io/discord/");
-            }
-        }
+        "Enter size like <cg>128x72</c> to scale the art.",
+        "OK", nullptr
     );
 }
 
-// updates settings and then imports the art
 void MainMenu::importArt(CCObject* sender) {
     artPointer->updateSettings();
+
+    // читаем строку из поля
+    std::string s = sizeInput->getString();
+
+    // парсим WIDTHxHEIGHT
+    int w = 0, h = 0;
+    sscanf(s.c_str(), "%dx%d", &w, &h);
+
+    // передаём в CreateArt
+    artPointer->setTargetSize(w, h);
+
+    // импорт
     artPointer->importArt();
 }

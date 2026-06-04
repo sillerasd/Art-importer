@@ -467,3 +467,9 @@ void CreateArt::updateSettings() {
 	tolerance = Mod::get()->getSettingValue<int>("Tolerance");
     basic = Mod::get()->getSettingValue<std::string>("Optimise-Type");
 }
+void CreateArt::setTargetSize(int w, int h) {
+    if (w > 0 && h > 0 && width > 0 && height > 0) {
+        scaleMulX = (float)w / (float)width;
+        scaleMulY = (float)h / (float)height;
+    }
+}
